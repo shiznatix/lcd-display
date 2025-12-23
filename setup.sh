@@ -37,8 +37,8 @@ fi
 backup $BOOT_CONFIG ignore_rm
 backup $BOOT_CMDLINE ignore_rm
 
-backup /etc/rc.local ignore_rm
-cp -rf ./etc/rc.local-original /etc/rc.local
+# backup /etc/rc.local ignore_rm
+# cp -rf ./etc/rc.local-original /etc/rc.local
 
 backup /etc/modprobe.d/fbtft.conf
 backup /etc/inittab

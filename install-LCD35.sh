@@ -10,14 +10,24 @@ cd "$(dirname "$0")"
 source ./vars.sh
 
 echo "** Installing dependencies **"
-rm -rf rpi-fbcp
-git clone https://github.com/tasanakorn/rpi-fbcp.git
-mkdir ./rpi-fbcp/build
-cd ./rpi-fbcp/build/
-cmake ..
-make
-install fbcp /usr/local/bin/fbcp
-cd - > /dev/null
+# rm -rf fbcp-ili9341
+# git clone https://github.com/juj/fbcp-ili9341.git --depth 1
+# cd fbcp-ili9341
+# mkdir build
+# cd build
+# cmake -DILI9486=ON -DSPI_BUS_CLOCK_DIVISOR=6 -DDISPLAY_ROTATE_180_DEGREES=OFF ..
+# make -j
+# # sudo ./fbcp-ili9341
+# install fbcp-ili9341 /usr/local/bin/fbcp
+
+# rm -rf rpi-fbcp
+# git clone https://github.com/tasanakorn/rpi-fbcp.git
+# mkdir ./rpi-fbcp/build
+# cd ./rpi-fbcp/build/
+# cmake ..
+# make
+# install fbcp /usr/local/bin/fbcp
+# cd - > /dev/null
 
 echo "** Installing Display **"
 rm -rf /etc/X11/xorg.conf.d/40-libinput.conf
