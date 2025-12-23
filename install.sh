@@ -15,6 +15,7 @@ boot_path="/boot/firmware"
 boot_config="$boot_path/config.txt"
 boot_cmdline="$boot_path/cmdline.txt"
 boot_overlays="$boot_path/overlays"
+backups_dir="./system-backups"
 
 echo "=========================================="
 echo "  Using Original tft35a Overlay"
@@ -22,7 +23,8 @@ echo "=========================================="
 echo ""
 
 echo "** Backing up current config **"
-cp "$boot_config" "$boot_config.backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$backups_dir"
+cp "$boot_config" "${backups_dir}/boot-config.backup-$(date +%Y%m%d-%H%M%S)"
 
 echo "** Copying original overlay **"
 cp ./tft35a-overlay.dtb "$boot_overlays/"

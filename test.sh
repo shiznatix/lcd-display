@@ -46,31 +46,32 @@ echo ""
 # Calculate framebuffer size
 fb_size=$((width * height * bpp / 8))
 
-echo "Running screen tests (watch your TFT display)..."
+test_black="dd if=/dev/zero of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null"
+test_white="tr '\0' '\377' < /dev/zero | dd of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null"
+test_red="printf '\x00\xF8' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
+test_green="printf '\xE0\x07' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
+test_blue="printf '\x1F\x00' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
+test_random="timeout 3 cat /dev/urandom > $TFT_FB 2>/dev/null"
+
+echo "Running screen tests in random order (watch your TFT display)..."
 echo ""
 
-echo "1. BLACK screen..."
-dd if=/dev/zero of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null
-sleep 3
+# Create array of test commands with labels
+tests=("BLACK:$test_black" "WHITE:$test_white" "RED:$test_red" "GREEN:$test_green" "BLUE:$test_blue" "RANDOM:$test_random")
 
-echo "2. WHITE screen..."
-tr '\0' '\377' < /dev/zero | dd of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null
-sleep 3
+# Shuffle the array using shuf
+readarray -t shuffled < <(printf '%s\n' "${tests[@]}" | shuf)
 
-echo "3. RED screen..."
-printf '\x00\xF8' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null
-sleep 3
-
-echo "4. GREEN screen..."
-printf '\xE0\x07' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null
-sleep 3
-
-echo "5. BLUE screen..."
-printf '\x1F\x00' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null
-sleep 3
-
-echo "6. Random pattern (3 seconds)..."
-timeout 3 cat /dev/urandom > $TFT_FB 2>/dev/null
+# Run each test in random order
+count=1
+for test in "${shuffled[@]}"; do
+	color="${test%%:*}"
+	command="${test#*:}"
+	echo "$count. $color screen..."
+	eval "$command"
+	sleep 3
+	((count++))
+done
 
 echo ""
 echo "=========================================="
