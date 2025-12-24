@@ -43,14 +43,31 @@ bpp=$(cat /sys/class/graphics/$fbname/bits_per_pixel)
 echo "  Display: ${width}x${height}, ${bpp}-bit color"
 echo ""
 
+
 # Calculate framebuffer size
 fb_size=$((width * height * bpp / 8))
+pixel_count=$((width * height))
+
+fill_color() {
+	local color_bytes="$1"
+	local fb_size="$2"
+	local blocksize=4096
+	local blockfile
+	blockfile=$(mktemp)
+	# Generate a 4KB block of the color
+	for ((i=0; i<blocksize/2; i++)); do
+		printf "$color_bytes"
+	done > "$blockfile"
+	# Use dd to fill the framebuffer with repeated blocks
+	dd if="$blockfile" of="$TFT_FB" bs=$blocksize count=$((fb_size / blocksize + 1)) conv=notrunc 2>/dev/null
+	rm -f "$blockfile"
+}
 
 test_black="dd if=/dev/zero of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null"
 test_white="tr '\0' '\377' < /dev/zero | dd of=$TFT_FB bs=1024 count=$((fb_size / 1024 + 1)) 2>/dev/null"
-test_red="printf '\x00\xF8' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
-test_green="printf '\xE0\x07' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
-test_blue="printf '\x1F\x00' | dd of=$TFT_FB bs=2 count=$((width * height)) 2>/dev/null"
+test_red="fill_color '\xF8\x00' $fb_size"
+test_green="fill_color '\x07\xE0' $fb_size"
+test_blue="fill_color '\x00\x1F' $fb_size"
 test_random="timeout 3 cat /dev/urandom > $TFT_FB 2>/dev/null"
 
 echo "Running screen tests in random order (watch your TFT display)..."
@@ -77,12 +94,4 @@ echo ""
 echo "=========================================="
 echo "  Test Complete"
 echo "=========================================="
-echo ""
-echo "✓ Display is working if you saw:"
-echo "  - Black, white, red, green, blue screens"
-echo "  - Colorful random pixels"
-echo ""
-echo "If the screen stayed blank/white:"
-echo "  - Run diagnostics: sudo ./diagnostics.sh"
-echo "  - Check connections and reinstall: sudo ./install.sh"
 echo ""

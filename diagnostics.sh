@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Detailed diagnostics for 3.5" TFT display issues
-
-echo "=========================================="
-echo "  Detailed Display Diagnostics"
-echo "=========================================="
-echo ""
-
 echo "=== 1. Kernel Modules ==="
 echo "Loaded SPI modules:"
 lsmod | grep spi
@@ -20,8 +13,8 @@ echo "Loaded display-related modules:"
 lsmod | grep -E "ili|panel|mipi|tft"
 echo ""
 
-echo "=== 2. Kernel Messages for ILI9486 ==="
-dmesg | grep -i ili
+echo "=== 2. Kernel Overlay Errors (dmesg) ==="
+dmesg | grep -i overlay
 echo ""
 
 echo "=== 3. SPI Device Messages ==="
@@ -134,6 +127,3 @@ echo ""
 echo "=========================================="
 echo "  Diagnostics Complete"
 echo "=========================================="
-echo ""
-echo "Please share this output for further troubleshooting."
-echo ""
