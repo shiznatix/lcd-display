@@ -51,15 +51,22 @@ pixel_count=$((width * height))
 fill_color() {
 	local color_bytes="$1"
 	local fb_size="$2"
-	local blocksize=4096
+	local pixel_size=2  # 2 bytes per pixel for RGB565
+	local block_pixels=4096  # Number of pixels per block
+	local blocksize=$((block_pixels * pixel_size))
 	local blockfile
 	blockfile=$(mktemp)
-	# Generate a 4KB block of the color
-	for ((i=0; i<blocksize/2; i++)); do
+	# Generate a block of the color (block_pixels * pixel_size bytes)
+	for ((i=0; i<block_pixels; i++)); do
 		printf "$color_bytes"
 	done > "$blockfile"
 	# Use dd to fill the framebuffer with repeated blocks
-	dd if="$blockfile" of="$TFT_FB" bs=$blocksize count=$((fb_size / blocksize + 1)) conv=notrunc 2>/dev/null
+	local blocks=$((fb_size / blocksize))
+	local remainder=$((fb_size % blocksize))
+	dd if="$blockfile" of="$TFT_FB" bs=$blocksize count=$blocks conv=notrunc 2>/dev/null
+	if [ "$remainder" -gt 0 ]; then
+		dd if="$blockfile" of="$TFT_FB" bs=1 count=$remainder seek=$((blocks * blocksize)) conv=notrunc 2>/dev/null
+	fi
 	rm -f "$blockfile"
 }
 
