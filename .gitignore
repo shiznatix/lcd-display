@@ -1,3 +1,4 @@
-.vscode/
+
 /eslint.config.json
 /client/eslint.config.json
+.vscode/
