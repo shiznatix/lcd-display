@@ -3,3 +3,5 @@
 /client/eslint.config.js
 
 .vscode/
+
+.rhpy
